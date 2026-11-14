@@ -34,6 +34,8 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.ParameterizedMessageFactory;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import java.util.UUID;
 
@@ -85,7 +87,12 @@ public class LogFilter implements Filter {
     private void log(Level level, String message) {
         try {
             FILTER_BYPASS.set(true);
-            LogManager.getRootLogger().log(level, message);
+            if (level == Level.INFO && message.indexOf(ChatColor.COLOR_CHAR) >= 0) {
+                // Let the console sender render legacy colors without changing other log levels.
+                Bukkit.getConsoleSender().sendMessage(message);
+            } else {
+                LogManager.getRootLogger().log(level, message);
+            }
         } finally {
             FILTER_BYPASS.remove();
         }
